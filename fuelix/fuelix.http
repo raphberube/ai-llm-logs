@@ -1,0 +1,7 @@
+GET https://api.fuelix.ai/v1/models
+Authorization: Bearer {{$processEnv API_FUELIX_TOKEN}}
+
+###
+
+GET https://api.fuelix.ai/v1/models/claude-opus-4
+Authorization: Bearer {{$processEnv API_FUELIX_TOKEN}}
