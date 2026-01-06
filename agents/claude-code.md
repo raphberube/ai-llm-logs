@@ -34,12 +34,19 @@ curl -fsSL https://claude.ai/install.sh | bash
 
 ## Use Claude Code with FuelIx
 
+- `ANTHROPIC_MODEL`
+  - `claude-4-sonnet`
+  - `claude-sonnet-4-5`
+  - `claude-sonnet-4-5[1m]` (enable large context window)
+
 ```json
 {
   "env": {
     "ANTHROPIC_BASE_URL": "https://api.fuelix.ai",
     "ANTHROPIC_AUTH_TOKEN": "<api key>",
-    "ANTHROPIC_MODEL": "claude-4-sonnet"
+    "ANTHROPIC_MODEL": "claude-4-sonnet",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5",
+    "DISABLE_TELEMETRY": "1"
   }
 }
 ```
