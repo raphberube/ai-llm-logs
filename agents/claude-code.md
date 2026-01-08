@@ -12,16 +12,6 @@
 - Project settings : `.claude/settings.json`
 - User settings : `~/.claude/settings.json`
 
-### Permissions
-
-```json
-"permissions": {
-    "allow": [
-        "Bash(grep:*)"
-    ]
-  }
-```
-
 ## Install 
 
 ```bash
@@ -35,97 +25,13 @@ curl -fsSL https://claude.ai/install.sh | bash
 ## Use Claude Code with FuelIx
 
 - `ANTHROPIC_MODEL`
+  - `claude-haiku-4-5`
   - `claude-4-sonnet`
   - `claude-sonnet-4-5`
   - `claude-sonnet-4-5[1m]` (enable large context window)
 
+Configuration example (`~/.claude/settings.json`) :
 ```json
-{
-  "env": {
-    "ANTHROPIC_BASE_URL": "https://api.fuelix.ai",
-    "ANTHROPIC_AUTH_TOKEN": "<api key>",
-    "ANTHROPIC_MODEL": "claude-4-sonnet",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5",
-    "DISABLE_TELEMETRY": "1"
-  }
-}
-```
-
-## Python code
-
-### Permissions
-
-Useful permissions to let Claude Code execute basic tasks without asking permission.
-
-```json
-{
-    "permissions": {
-        "allow": [
-            "Bash(poe:*)",
-            "Bash(pytest:*)",
-            "Bash(black:*)",
-            "Bash(flake8:*)"
-        ]
-    }
-}
-```
-
-### Hooks
-
-```json
-{
-  "hooks": {
-        "PostToolUse": [
-            {
-                "matcher": "Edit|MultiEdit|Write",
-                "hooks": [
-                    {
-                        "type": "command",
-                        "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.py$'; then pyright \"$file_path\" >&2; fi; }"
-                    },
-                    {
-                        "type": "command",
-                        "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.py$'; then black \"$file_path\" >&2; fi; }"
-                    },
-                    {
-                        "type": "command",
-                        "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.py$'; then autoflake \"$file_path\" >&2; fi; }"
-                    },
-                    {
-                        "type": "command",
-                        "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.py$'; then flake8 \"$file_path\" >&2; fi; }"
-                    }
-                ]
-            }
-        ]
-    }
-}
-```
-
-## Appendix
-
-### Settings - Complete user settings example
-
-```json
-{
-  "env": {
-    "ANTHROPIC_BASE_URL": "https://api.fuelix.ai",
-    "ANTHROPIC_AUTH_TOKEN": "<api key>",
-    "ANTHROPIC_MODEL": "claude-4-sonnet"
-  },
-  "permissions": {
-    "allow": [
-        "Bash(poe pytest:*)",
-        "Bash(pytest:*)",
-        "Bash(black:*)",
-        "Bash(flake8:*)",
-        "Bash(grep:*)"
-    ]
-  }
-}
-```
-
-```
 {
   "env": {
     "ANTHROPIC_BASE_URL": "https://api.fuelix.ai",
@@ -147,6 +53,9 @@ Useful permissions to let Claude Code execute basic tasks without asking permiss
       "Bash(grep:*)",
       "Bash(sed:*)",
       "Bash(wc:*)",
+      "Bash(awk:*)",
+      "Bash(ls:*)",
+      "Bash(tail:*)",
       "Bash(pdfgrep:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr diff:*)",
@@ -177,38 +86,45 @@ Useful permissions to let Claude Code execute basic tasks without asking permiss
   "enabledPlugins": {
     "pr-review-toolkit@claude-code-plugins": true,
     "feature-dev@claude-code-plugins": true,
-    "code-review@claude-code-plugins": true
-  }
+    "code-review@claude-code-plugins": true,
+    "pyright-lsp@claude-plugins-official": true
+  },
+  "alwaysThinkingEnabled": true
 }
 ```
 
-```
+## Python code
+
+### Hooks
+
+Claude Code Hooks for linting and formatting Python code after using Edit, MultiEdit or Write tools.
+
+```json
 {
-  "env": {
-    "ANTHROPIC_BASE_URL": "https://api.fuelix.ai",
-    "ANTHROPIC_AUTH_TOKEN": "<fuelix api key>",
-    "ANTHROPIC_MODEL": "claude-sonnet-4-5-20250929[1m]",
-    "ANTHROPIC_CUSTOM_HEADERS": "anthropic-beta: context-1m-2025-08-07",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5"
-  },
-  "permissions": {
-    "allow": [
-      "Bash(poe pytest:*)",
-      "Bash(pytest:*)",
-      "Bash(black:*)",
-      "Bash(flake8:*)",
-      "Bash(grep:*)",
-      "Bash(ast-grep:*)",
-      "Bash(grep:*)",
-      "Bash(gh pr view:*)",
-      "Bash(git log:*)"
-    ]
-  },
-  "enabledPlugins": {
-    "pr-review-toolkit@claude-code-plugins": true,
-    "feature-dev@claude-code-plugins": true,
-    "code-review@claude-code-plugins": true
-  },
-  "alwaysThinkingEnabled": true
+  "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "Edit|MultiEdit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.py$'; then pyright \"$file_path\" >&2; fi; }"
+                    },
+                    {
+                        "type": "command",
+                        "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.py$'; then black \"$file_path\" >&2; fi; }"
+                    },
+                    {
+                        "type": "command",
+                        "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.py$'; then autoflake \"$file_path\" >&2; fi; }"
+                    },
+                    {
+                        "type": "command",
+                        "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.py$'; then flake8 \"$file_path\" >&2; fi; }"
+                    }
+                ]
+            }
+        ]
+    }
 }
 ```
